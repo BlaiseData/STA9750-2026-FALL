@@ -1,0 +1,43 @@
+---
+title: "Bernard Blaise - STA 9750 Portfolio"
+engine: knitr
+---
+
+<img src="Web Content/pfp.png" alt="Bernard Blaise" style="float: right; width: 180px; border-radius: 50%; margin-left: 20px; margin-bottom: 20px;">
+
+## Welcome!
+
+Hello! I am a Master's student at Baruch College, and this website serves as a repository for my project submissions and analyses for **STA 9750**.
+
+### About Me
+
+* **Program:** MS in Statistics
+* **Institution:** Baruch College, CUNY
+* **Focus Areas:** Quantitative analysis, statistical modeling, and data analysis
+
+<div style="clear: both;"></div>
+
+---
+
+### Location
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(leaflet)
+
+baruch_longitude <- -73.98333
+baruch_latitude  <- +40.74028
+
+leaflet() |>
+  addTiles() |>
+  setView(baruch_longitude, baruch_latitude, zoom=17) |>
+  addPopups(baruch_longitude, baruch_latitude, 
+            "I am a Master's student at <b>Baruch College</b>!")
+```
+
+---
+
+Last Updated: `r format(Sys.time(), "%A %B %d, %Y at %I:%M %p")`
