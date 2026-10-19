@@ -16,6 +16,7 @@ Netflix rode a massive wave during the pandemic, turning from a casual entertain
 ```{r}
 #| echo: true
 #| output: false
+# Data and library loading
 load_netflix_data <- function(){
 
   library(tidyverse)
@@ -94,19 +95,9 @@ load_netflix_data <- function(){
 }
 
 NETFLIX_DATA <- load_netflix_data()
-```
 
-```{r}
-#| echo: true
-#| output: false
-NETFLIX_DATA <- load_netflix_data()
+# Then standardize column names, cast variables to appropriate data types, and run preliminary verification checks on missing values, duplicate entries, and headline viewership metrics
 
-glimpse(NETFLIX_DATA)
-```
-
-```{r}
-#| echo: true
-#| output: false
 NETFLIX_DATA <- NETFLIX_DATA |>
   rename(
     title = Title,
@@ -122,18 +113,10 @@ NETFLIX_DATA <- NETFLIX_DATA |>
   )
 
 glimpse(NETFLIX_DATA)
-```
 
-```{r}
-#| echo: true
-#| output: false
 NETFLIX_DATA |> slice_sample(n = 10)
 skim(NETFLIX_DATA)
-```
 
-```{r}
-#| echo: true
-#| output: false
 NETFLIX_DATA |>
   summarise(
     missing_hours = sum(is.na(hours_viewed)),
@@ -141,19 +124,13 @@ NETFLIX_DATA |>
     missing_release_date = sum(is.na(release_date)),
     missing_global_flag = sum(is.na(available_globally))
   )
-```
 
-```{r}
-#| echo: true
-#| output: false
 NETFLIX_DATA |>
   count(period, title) |>
   filter(n > 1)
-```
 
-```{r}
-#| echo: true
-#| output: false
+# Next, we look at the big picture by calculating a few summary numbers—including the overall date range, total unique shows, viewing totals for major franchises, how much viewing time goes to the top shows, and how widely available content is worldwide.
+
 date_range <- NETFLIX_DATA |>
   summarise(
     first_period = min(period_start, na.rm = TRUE),
@@ -382,6 +359,9 @@ Prerecorded shows and movies consistently outpaced live broadcasts in total watc
 The Gini coefficient is an economic measurement of inequality. In the context of this analysis of Netflix: A Gini coefficient of 0.0 would mean every single title on Netflix would have pulled in the exact same number of viewing hours where an obscure documentary gets the exact same traffic as Stranger Things. And a coefficient of 1.0 would mean that one single title would account for 100% of all viewing hours on the entire platform.
 
 ```{r}
+#| echo: true
+#| output: false
+# Define a function to calculate the Gini coefficient
 gini_coefficient <- function(x) {
   x <- x[!is.na(x) & x >= 0]
   n <- length(x)
@@ -394,14 +374,16 @@ gini_coefficient <- function(x) {
 
   (2 * sum(seq_along(x) * x) / (n * sum(x))) - ((n + 1) / n)
 }
-```
 
-```{r}
+# Test the function
+
 example_income <- c(20000, 200000, 0, 50000, 40000)
 gini_coefficient(example_income)
 ```
 
 ```{r}
+# Next, we examine how unevenly viewership is distributed across titles in each reporting period by calculating Gini coefficients—both for total viewing hours and for runtime-normalized hours—and display the results in a summary table.
+
 gini_by_period <- NETFLIX_DATA |>
   mutate(hours_per_runtime_minute = hours_viewed / runtime) |>
   group_by(period) |>
