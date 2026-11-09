@@ -4,7 +4,7 @@ format:
   html:
     toc: true
     code-fold: true
-    embed-resources: true
+    embed-resources: false
 execute:
   echo: true
   warning: false
@@ -517,10 +517,9 @@ At the opposite end of the spectrum, nationwide service metrics show severe geog
 
 **Note:**Despite these differences, a quick check confirms that every state is included in the dataset: `r if(length(missing_states) == 0) "Yes, all 50 states are represented in the dataset." else paste("No, missing states:", missing_states_text)`
 
+# Conclusion
 
-
-
-
+Based on all evidence gathered, the most energy productive agencies as well as their terrible counterparts could be identified. These agencies are the best in their class as shown in the following table:
 
 ```{r}
 #| echo: true
@@ -543,247 +542,244 @@ NTD_ENERGY |>
   summarize(total_biodiesel = sum(`Gallons of Bio-Diesel`, na.rm = TRUE)) |>
   arrange(desc(total_biodiesel)) |>
   head(1)
-```
 
-```{r}
-# Merge the three core datasets and compute total greenhouse gas emissions per Agency and Mode:
-complete_transit_data <- NTD_SERVICE |>
-    inner_join(
-      NTD_ENERGY |> mutate(`NTD ID` = as.character(`NTD ID`)),
-      join_by(NTD_ID == `NTD ID`, mode == Mode, AGENCY == `Agency Name`)
-    ) |>
-    inner_join(
-      EIA_SEP_REPORT,
-      join_by(state == abbreviation)
-    ) |>
-    mutate(
-        emissions_electricity = (`Kilowatt hours of Electric Battery` + `Kilowatt hours of Electric Propulsion`) * (CO2_MWh / 1e6),
-        emissions_diesel = `Gallons of Diesel Fuel` * 22.4,
-        emissions_cng = `Gallons of Compressed Natural Gas` * 120.6 / 1.2,
-        total_emissions_lbs = emissions_electricity + emissions_diesel + emissions_cng
-    )
-```
-
-```{r}
-# Normalize emissions by passenger usage metrics to evaluate operational efficiency:
-agency_efficiency <- complete_transit_data |>
-    group_by(AGENCY, state) |>
-    summarize(
-        total_emissions = sum(total_emissions_lbs, na.rm = TRUE),
-        total_upt = sum(total_upt, na.rm = TRUE),
-        total_passenger_miles = sum(sum_passenger_miles, na.rm = TRUE),
-        .groups = "drop"
-    ) |>
-    filter(total_upt > 100000) |>
-    mutate(
-        emissions_per_upt = total_emissions / total_upt,
-        emissions_per_mile = total_emissions / total_passenger_miles
-    )
-```
-
-```{r}
-#| echo: true
-# 1. Build the complete merged transit dataset (Agency + Mode grain)
-complete_transit_data <- NTD_SERVICE |>
-    inner_join(
-      NTD_ENERGY |> mutate(`NTD ID` = as.character(`NTD ID`)),
-      join_by(NTD_ID == `NTD ID`, mode == Mode, AGENCY == `Agency Name`)
-    ) |>
-    inner_join(
-      EIA_SEP_REPORT,
-      join_by(state == abbreviation)
-    ) |>
-    mutate(
-        # Calculate emissions by fuel source
-        emissions_electricity = (`Kilowatt hours of Electric Battery` + `Kilowatt hours of Electric Propulsion`) * (CO2_MWh / 1e6),
-        emissions_diesel = `Gallons of Diesel Fuel` * 22.4,
-        emissions_cng = `Gallons of Compressed Natural Gas` * 120.6 / 1.2,
-        
-        # Total emissions in pounds
-        total_emissions_lbs = emissions_electricity + emissions_diesel + emissions_cng
-    )
-
-# 2. Task Output 1: Summary table of total emissions by Agency and Mode (Top 10 highest emitters)
-agency_mode_emissions <- complete_transit_data |>
-    group_by(AGENCY, mode, state) |>
-    summarize(
-        total_upt = sum(total_upt, na.rm = TRUE),
-        total_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
-        .groups = "drop"
-    ) |>
-    arrange(desc(total_emissions_lbs))
-
-# Display the top emitting agency-mode pairs
-print("Top Emitters by Agency and Mode:")
-print(head(agency_mode_emissions, 10))
-
-# 3. Task Output 2: State-level aggregation for environmental impact reporting
-state_emissions_summary <- complete_transit_data |>
-    group_by(state, primary_source) |>
-    summarize(
-        agency_count = n_distinct(AGENCY),
-        total_state_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
-        avg_co2_mwh = mean(CO2_MWh, na.rm = TRUE),
-        .groups = "drop"
-    ) |>
-    arrange(desc(total_state_emissions_lbs))
-
-print("Emissions Summary by State and Primary Energy Source:")
-print(head(state_emissions_summary, 10))
-```
-
-::: {.callout-note collapse="true"}
-```{r}
-#| echo: true
-# Build the complete merged transit dataset (Agency + Mode grain)
-complete_transit_data <- NTD_SERVICE |>
-    inner_join(
-      NTD_ENERGY |> mutate(`NTD ID` = as.character(`NTD ID`)),
-      join_by(NTD_ID == `NTD ID`, mode == Mode, AGENCY == `Agency Name`)
-    ) |>
-    inner_join(
-      EIA_SEP_REPORT,
-      join_by(state == abbreviation)
-    ) |>
-    mutate(
-        # Calculate emissions by fuel source
-        emissions_electricity = (`Kilowatt hours of Electric Battery` + `Kilowatt hours of Electric Propulsion`) * (CO2_MWh / 1e6),
-        emissions_diesel = `Gallons of Diesel Fuel` * 22.4,
-        emissions_cng = `Gallons of Compressed Natural Gas` * 120.6 / 1.2,
-        
-        # Total emissions in pounds
-        total_emissions_lbs = emissions_electricity + emissions_diesel + emissions_cng
-    )
-
-# Create summary table of total emissions by Agency and Mode (Top 10 highest emitters)
-agency_mode_emissions <- complete_transit_data |>
-    group_by(AGENCY, mode, state) |>
-    summarize(
-        total_upt = sum(total_upt, na.rm = TRUE),
-        total_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
-        .groups = "drop"
-    ) |>
-    arrange(desc(total_emissions_lbs))
-
-print("Top Emitters by Agency and Mode:")
-print(head(agency_mode_emissions, 10))
-```
-:::
-
-```{r}
-#| echo: true
-library(DT)
-library(formattable)
-
-# Format the top agency emissions table with conditional background color scaling
-complete_transit_data |>
-  group_by(AGENCY, mode, state) |>
-  summarize(
-    total_upt = sum(total_upt, na.rm = TRUE),
-    total_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
-    .groups = "drop"
+## Join NTD_SERVICE and NTD_ENERGY after aligning mode names and ID types, join EIA, and compute emissions
+agency_emissions_summary <- NTD_SERVICE |>
+  mutate(mode_matched = case_when(
+    mode == "HR" ~ "Heavy Rail",
+    mode == "MB" ~ "Bus",
+    mode == "LR" ~ "Light Rail",
+    mode == "CR" ~ "Commuter Rail",
+    mode == "DR" ~ "Demand Response",
+    TRUE ~ "Other/Unknown"
+  )) |>
+  inner_join(
+    NTD_ENERGY |> mutate(`NTD ID` = as.character(`NTD ID`)), 
+    by = c("NTD_ID" = "NTD ID", "mode_matched" = "Mode"),
+    relationship = "many-to-many"
   ) |>
-  arrange(desc(total_emissions_lbs)) |>
-  head(15) |>
+  left_join(
+    EIA_SEP_REPORT, 
+    by = c("state" = "state")
+  ) |>
   mutate(
-    total_emissions_lbs = comma(total_emissions_lbs, digits = 0),
-    total_upt = comma(total_upt, digits = 0)
-  ) |>
-  datatable(
-    options = list(pageLength = 5, dom = 'tip'),
-    caption = htmltools::tags$caption(
-      style = 'caption-side: top; text-align: left; font-weight: bold; font-size: 1.1em;',
-      'Table: Top 15 Transit Agency-Mode Pairs by Greenhouse Gas Emissions'
-    ),
-    colnames = c("Agency", "Mode", "State", "Total UPT", "Total Emissions (lbs)")
+    diesel_emissions = coalesce(`Gallons of Diesel Fuel`, 0) * 10.21,
+    cng_emissions = coalesce(`Gallons of Compressed Natural Gas`, 0) * 54.53, 
+    gasoline_emissions = coalesce(`Gallons of Gasoline`, 0) * 8.78,
+    lpg_emissions = coalesce(`Gallons of Liquified Petroleum Gas`, 0) * 6.00,
+    lng_emissions = coalesce(`Gallons of Liquified Nat Gas`, 0) * 52.50,
+    biodiesel_emissions = coalesce(`Gallons of Bio-Diesel`, 0) * 9.45,
+    
+    total_kwh_electric = coalesce(`Kilowatt hours of Electric Propulsion`, 0) + coalesce(`Kilowatt hours of Electric Battery`, 0),
+    electricity_emissions = (total_kwh_electric / 1000) * CO2_MWh,
+    
+    total_co2_emissions = diesel_emissions + cng_emissions + gasoline_emissions + 
+                          lpg_emissions + lng_emissions + biodiesel_emissions + electricity_emissions
   )
-```
 
-::: {.callout-note collapse="true"}
-```{R}
-# State-level aggregation for environmental impact reporting
-state_emissions_summary <- complete_transit_data |>
-    group_by(state, primary_source) |>
-    summarize(
-        agency_count = n_distinct(AGENCY),
-        total_state_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
-        avg_co2_mwh = mean(CO2_MWh, na.rm = TRUE),
-        .groups = "drop"
-    ) |>
-    arrange(desc(total_state_emissions_lbs))
+complete_transit_data <- agency_emissions_summary
 
-print("Emissions Summary by State and Primary Energy Source:")
-print(head(state_emissions_summary, 10))
-```
-:::
+#Aggregate emissions to the Agency level, combine with UPT/PMT, categorizing by size, and compute efficiency metrics (emissions per UPT and per passenger mile).
 
-```{r}
-#| echo: true
-library(plotly)
+agency_total_emissions <- agency_emissions_summary |>
+  group_by(AGENCY, state) |>
+  summarise(total_emissions = sum(total_co2_emissions, na.rm = TRUE), .groups = "drop")
 
-# Create an interactive scatter plot of UPT vs Total Emissions
-p <- complete_transit_data |>
-  group_by(AGENCY, mode, state) |>
-  summarize(
+agency_service_totals <- NTD_SERVICE |>
+  group_by(AGENCY) |>
+  summarise(
     total_upt = sum(total_upt, na.rm = TRUE),
-    total_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
+    total_pmt = sum(sum_passenger_miles, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Join emissions and service data, filter out extremely small outliers, and create size tiers based on total UPT
+agency_efficiency <- agency_total_emissions |>
+  inner_join(agency_service_totals, by = "AGENCY") |>
+  filter(total_upt > 10000) |>
+  mutate(
+    
+    size_tier = case_when(
+      total_upt > 50000000 ~ "Large",
+      total_upt > 5000000  ~ "Medium",
+      TRUE                 ~ "Small"
+    ),
+
+    emissions_per_upt = total_emissions / total_upt,
+    emissions_per_pmt = total_emissions / total_pmt
+  )
+
+# Find the most efficient agencies (lowest emissions per passenger mile) by size tier
+top_efficient_per_pmt <- agency_efficiency |>
+  group_by(size_tier) |>
+  slice_min(order_by = emissions_per_pmt, n = 3, with_ties = FALSE) |>
+  select(size_tier, AGENCY, total_upt, emissions_per_pmt)
+
+print(top_efficient_per_pmt)
+```
+```{r}
+#| label: calculate-awards
+#| message: false
+#| warning: false
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+
+# 1. Aggregate service data at the agency level
+award_service <- NTD_SERVICE |>
+  group_by(AGENCY, state) |>
+  summarise(
+    total_upt = sum(total_upt, na.rm = TRUE),
+    total_pmt = sum(sum_passenger_miles, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# 2. Aggregate energy consumption at the agency level
+award_energy <- NTD_ENERGY |>
+  group_by(`Agency Name`) |>
+  summarise(
+    total_kwh_electric = sum(
+      coalesce(`Kilowatt hours of Electric Propulsion`, 0) +
+      coalesce(`Kilowatt hours of Electric Battery`, 0),
+      na.rm = TRUE
+    ),
+    total_fuel_gallons = sum(
+      coalesce(`Gallons of Diesel Fuel`, 0) +
+      coalesce(`Gallons of Compressed Natural Gas`, 0) +
+      coalesce(`Gallons of Gasoline`, 0),
+      na.rm = TRUE
+    ),
     .groups = "drop"
   ) |>
-  filter(total_emissions_lbs > 0 & total_upt > 0) |>
-  ggplot(aes(x = total_upt, y = total_emissions_lbs, color = mode, 
-             text = paste0("Agency: ", AGENCY, 
-                           "<br>State: ", state, 
-                           "<br>Emissions (lbs):, ", scales::comma(total_emissions_lbs),
-                           "<br>UPT: ", scales::comma(total_upt)))) +
-  geom_point(alpha = 0.7, size = 3) +
-  scale_y_log10(labels = scales::label_comma()) +
-  scale_x_log10(labels = scales::label_comma()) +
-  labs(
-    title = "Transit Ridership vs. Greenhouse Gas Emissions by Mode",
-    subtitle = "Log-scale comparison of annual passenger trips against carbon output",
-    x = "Total Unlinked Passenger Trips (UPT) [Log Scale]",
-    y = "Total Emissions (lbs CO2e) [Log Scale]",
-    color = "Transit Mode"
-  ) +
-  theme_minimal() +
-  theme(
-    plot.title = element_text(face = "bold", size = 14),
-    legend.position = "right"
+  rename(AGENCY = `Agency Name`)
+
+# 3. Combine service, emissions, and energy data
+agency_award_base <- award_service |>
+  inner_join(agency_total_emissions, by = c("AGENCY", "state")) |>
+  left_join(award_energy, by = "AGENCY") |>
+  mutate(
+    total_emissions_kg = total_emissions,
+    total_kwh_electric = coalesce(total_kwh_electric, 0),
+    total_fuel_gallons = coalesce(total_fuel_gallons, 0)
+  ) |>
+  filter(total_upt > 10000)
+
+# Award 1: Greenest Transit Agency
+greenest_agency <- agency_award_base |>
+  filter(total_pmt > 0) |>
+  mutate(emissions_per_pmt = total_emissions_kg / total_pmt) |>
+  arrange(emissions_per_pmt) |>
+  slice(1)
+
+# Award 2: Most Emissions Avoided
+agency_avoided <- agency_award_base |>
+  mutate(
+    baseline_car_emissions_kg = total_pmt * 0.404,
+    emissions_avoided_kg = baseline_car_emissions_kg - total_emissions_kg
+  ) |>
+  arrange(desc(emissions_avoided_kg))
+
+top_avoided <- agency_avoided |> slice(1)
+
+# Award 3: Highest Electrification Percentage
+best_electrification <- agency_award_base |>
+  mutate(
+    electrification_pct = (total_kwh_electric / 
+      (total_kwh_electric + total_fuel_gallons + 1)) * 100
+  ) |>
+  arrange(desc(electrification_pct)) |>
+  slice(1)
+
+# Award 4: The Smog Spewer Award
+worst_agency <- agency_award_base |>
+  filter(total_upt > 1000000) |>
+  mutate(emissions_per_upt = total_emissions_kg / total_upt) |>
+  arrange(desc(emissions_per_upt)) |>
+  slice(1)
+
+# 5. Combine winners into a single presentation data frame
+winners_summary <- bind_rows(
+  data.frame(
+    Award = "Greenest Transit Agency",
+    Agency = greenest_agency$AGENCY[1],
+    State = greenest_agency$state[1],
+    Metric = paste(round(greenest_agency$emissions_per_pmt[1], 4),
+                   "kg CO2/PMT")
+  ),
+  data.frame(
+    Award = "Most Emissions Avoided",
+    Agency = top_avoided$AGENCY[1],
+    State = top_avoided$state[1],
+    Metric = paste(round(top_avoided$emissions_avoided_kg[1] / 1e6, 1),
+                   "Million kg CO2 Avoided")
+  ),
+  data.frame(
+    Award = "Vanguard Electrification",
+    Agency = best_electrification$AGENCY[1],
+    State = best_electrification$state[1],
+    Metric = paste(round(best_electrification$electrification_pct[1], 1),
+                   "% Electric")
+  ),
+  data.frame(
+    Award = "The Smog Spewer Award",
+    Agency = worst_agency$AGENCY[1],
+    State = worst_agency$state[1],
+    Metric = paste(round(worst_agency$emissions_per_upt[1], 2),
+                   "kg CO2/UPT")
   )
+)
 
-plotly::ggplotly(p, tooltip = "text") |>
-  layout(hoverlabel = list(bgcolor = "white", font = list(size = 12)))
+# 6. Display official award winners
+kable(winners_summary,
+      caption = "Official GTA Green Transit Award Winners") |>
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
-```{r}
-#| echo: true
-# Build an interactive plotly scatter plot to display state electricity pricing:
+##Grand Transit Analytics (GTA) Announces National Green Transit Award Winners for 2026
 
-library(ggplot2)
-library(plotly)
-library(scales)
+Grand Transit Analytics (GTA) Announces National Green Transit Award Winners for 2026
+NEW YORK, NY — The Grand Transit Analytics (GTA) initiative has officially published its comprehensive nationwide environmental audit of public transit networks for Fall 2026. Public transit remains the backbone of urban climate resilience, but efficiency varies wildly across state lines and operating modes. Below are the official winners of the 2026 GTA Green Transit Awards.
 
-p <- ggplot(EIA_SEP_REPORT, aes(
-    x = generation_MWh, 
-    y = electricity_price_MWh,
-    color = primary_source,
-    text = paste0(
-      "<b>State:</b> ", state, "<br>",
-      "<b>Price:</b> $", round(electricity_price_MWh, 2), "/MWh<br>",
-      "<b>Generation:</b> ", comma(generation_MWh), " MWh<br>",
-      "<b>Source:</b> ", primary_source
-    )
-  )) +
-  geom_point(size = 3, alpha = 0.8) +
-  scale_x_log10(labels = label_comma()) + 
-  
-  scale_color_discrete(name = "Primary Energy Source") +
-  labs(
-    title = "Electricity Generation vs. Retail Price by State",
-    x = "Total Generation (MWh)",
-    y = "Retail Price ($/MWh)"
-  ) +
-  theme_minimal()
+**1. The Greenest Transit Agency Award **
+Winner: `r greenest_agency$AGENCY` (`r greenest_agency$state`)
 
-ggplotly(p, tooltip = "text")
-```
+Winning Metric: `r round(greenest_agency$emissions_per_pmt, 4)` kg CO₂ per Passenger Mile Traveled (PMT)
+
+The Insight: While the national median transit network hovers significantly higher in carbon overhead, top-tier operators demonstrate that high-density ridership scales emissions per passenger down to microscopic margins. `r greenest_agency$AGENCY` sets the gold standard for carbon efficiency per passenger mile.
+
+**2. Most Emissions Avoided Award**
+Winner: `r top_avoided$AGENCY` (`r top_avoided$state`)
+
+Winning Metric: `r round(top_avoided$emissions_avoided_kg / 1e6, 1)` Million kg CO₂ Avoided
+
+The Insight: Evaluated against equivalent single-occupancy vehicle (SOV) travel under EPA standards, `r top_avoided$AGENCY` successfully kept millions of kilograms of greenhouse gases out of the atmosphere by moving heavy volumes of commuters away from individual cars.
+
+**3. Vanguard Electrification Award (Custom Award)**
+Winner: `r best_electrification$AGENCY` (`r best_electrification$state`)
+
+Winning Metric: Winning Metric: `r round(best_electrification$electrification_pct, 1)`% Electrification Share
+
+The Insight: Moving beyond simple ridership counts, this custom award honors systems achieving near-total grid integration. `r best_electrification$AGENCY` proves that aggressive capital investments in electric propulsion yield immediate, zero-emission operational profiles.
+
+**4. The "Smog Spewer" Booby Prize (Worst Of Award)**
+Winner: `r worst_agency$AGENCY` (`r worst_agency$state`)
+
+Winning Metric: `r round(worst_agency$emissions_per_upt, 2)` kg CO₂ per Unlinked Passenger Trip (UPT)
+
+The Insight: In the spirit of "name and shame," we highlight high-demand regional systems that remain stubbornly tethered to legacy fossil-fuel fleets. This booby prize serves as a direct call to action for regional transit boards to accelerate green fleet modernization.
+
+
+::: {.callout-note title="AI Usage Statement" collapse="true"}
+
+AI assistance (Gemini) was utilized during the development of this project in the following capacities:
+
+* **Debugging & Error Resolution:** Used to interpret R error messages, troubleshoot code syntax, and resolve knitting issues within R Markdown.
+* **Code Optimization:** Consulted for advice on improving code efficiency, streamlining data manipulation steps, and refining output formatting.
+* **Analytical Guidance & Problem-Solving:** Used as a sounding board to brainstorm logical approaches for structuring data interpretations and organizing analytical findings.
+
+:::
+
+
+
