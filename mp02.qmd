@@ -1,8 +1,19 @@
 ---
-title: "Mini-Project Placeholder"
+title: "An Analysis On Nationwide Emissions. "
+format:
+  html:
+    toc: true
+    code-fold: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: false
+  message: false
 ---
 
 ```{r}
+#| echo: true
+#| output: false
 # First we acquire and parse the EIA State Electricity Profiles into a tidy data frame:
 library(tidyverse)
 library(stringr)
@@ -84,6 +95,8 @@ EIA_SEP_REPORT <- map2(state.name, state.abb, get_eia_sep) |> list_rbind()
 ```
 
 ```{r}
+#| echo: true
+#| output: false
 load_ntd_energy <- function(){
   library(readxl)
   library(httr2)
@@ -142,6 +155,8 @@ NTD_ENERGY <- load_ntd_energy()
 ```
 
 ```{r}
+#| echo: true
+#| output: false
 load_ntd_service <- function(){
   library(httr2)
   library(tidyverse)
@@ -191,4 +206,329 @@ load_ntd_service <- function(){
 }
 
 NTD_SERVICE <- load_ntd_service()
+```
+
+To integrate state-level environmental data with transit energy consumption, the relational architecture below relies on NTD_SERVICE as a necessary bridge between datasets. Because NTD_ENERGY tracks fuel metrics without regional indicators, it is first linked to NTD_SERVICE using a compound key of agency ID and mode of transportation to accurately align operational metrics across specific transit modes. Once merged, the State variable enables a second link to the EIA_SEP_REPORT table. As illustrated in the diagram, this step-by-step pipeline combines agency-level fuel data with state-level emissions and power grid characteristics.
+
+```{r}
+#| echo: true
+library(DiagrammeR)
+grViz("
+digraph {
+  graph [layout = dot, rankdir = LR, nodesep = 0.8, ranksep = 1.0, fontname = 'Helvetica']
+  node [shape = box, style = 'filled,rounded', fontname = 'Helvetica', fontsize = 11, margin = 0.3]
+  edge [fontname = 'Helvetica', fontsize = 9, color = '#64748B', fontcolor = '#475569']
+  
+  EIA [label = 'EIA_SEP_REPORT\\l• State\\l• CO2 Emissions\\l• Energy Source\\l', fillcolor = '#E0F2FE', color = '#BAE6FD']
+  ENERGY [label = 'NTD_ENERGY\\l• Agency Id\\l• Agency Name\\l• Mode of Transit\\l• Fuel Consumption\\l', fillcolor = '#FCE7F3', color = '#FBCFE8']
+  SERVICE [label = 'NTD_SERVICE\\l• Agency Id\\l• State\\l• Agency Name\\l• Mode of Transit\\l• Total Passenger Trips\\l', fillcolor = '#DCFCE7', color = '#BBF7D0']
+  
+  ENERGY -> SERVICE [label = ' Join on NTD_ID & Mode ']
+  SERVICE -> EIA [label = ' Join on State Abbreviation ']
+}
+")
+```
+
+```{r}
+#| echo: true
+# Next, we recode the technical transit mode abbreviations into readable descriptions:
+recode_values <- function(x, ...) {
+    args <- list(...)
+    val <- args[[x]]
+    if (is.null(val)) {
+        return(args[["default"]])
+    }
+    return(val)
+}
+NTD_ENERGY <- NTD_ENERGY |>
+    mutate(Mode = case_when(
+        Mode == "HR" ~ "Heavy Rail",
+        Mode == "MB" ~ "Bus",
+        Mode == "LR" ~ "Light Rail",
+        Mode == "CR" ~ "Commuter Rail",
+        Mode == "DR" ~ "Demand Response",
+        TRUE ~ "Other/Unknown"
+    ))
+```
+
+```{r}
+#| echo: true
+EIA_SEP_REPORT |>
+  arrange(desc(CO2_MWh)) |>
+  head(5) |>
+  select(-abbreviation) |>
+  gt() |>
+  tab_header(
+    title = "Top 5 States with Dirtiest Electricity Mixes", 
+    subtitle = "Measured in lbs CO2 per MWh generated"
+  ) |>
+  cols_label(
+    CO2_MWh = "CO2 Emissions",
+    primary_source = "Energy Source",
+    electricity_price_MWh = "Electricity Price",
+    generation_MWh = "Generation (MWh)",
+    state = "State"
+  ) |>
+  fmt_number(
+    columns = c(CO2_MWh, electricity_price_MWh, generation_MWh), 
+    decimals = 0
+  ) |>
+  data_color(
+    columns = CO2_MWh, 
+    colors = scales::col_numeric(
+      palette = c("yellow", "orange", "red"),
+      domain = NULL
+    )
+  ) |>
+  opt_stylize(style = 6, color = "gray")
+```
+
+Based on the table, West Virginia stands out with the highest carbon intensity in its power grid at 1,912 lbs of CO₂ per MWh generated, closely followed by Kentucky (1,744 lbs) and Wyoming (1,724 lbs). Coal serves as the primary energy source driving these elevated emissions in four out of the top five states, with Hawaii standing as the sole exception by relying on petroleum. However, Hawaii also exhibits a distinct profile compared to the continental states: its total power generation remains relatively low at 9.2M MWh (whereas the other four states produce between 40.7M and 67.0M MWh) and its electricity price reaches a staggering \$380 per MWh, which is more than triple the \$91 to \$111 per MWh range seen across the rest of the top emitters.
+
+```{r}
+#| echo: true
+# Next, we build an interactive plotly scatter plot to display state electricity pricing:
+library(plotly)
+p <- EIA_SEP_REPORT |>
+    ggplot(aes(x = generation_MWh, y = electricity_price_MWh, text = state, color = primary_source)) +
+    geom_point(size = 3) +
+    scale_x_log10() +
+    labs(title = "Electricity Generation vs. Retail Price by State", x = "Total Generation (MWh)", y = "Retail Price ($/MWh)") +
+    theme_minimal()
+ggplotly(p, tooltip = "text")
+```
+
+```{r}
+#| echo: true
+#| output: false
+# Test joins to verify cross-table relationships between transit service and energy profiles
+NTD_SERVICE |>
+  inner_join(
+    EIA_SEP_REPORT |> filter(primary_source == "Nuclear"),
+    join_by(state == abbreviation)
+  ) |>
+  summarize(total_upt = sum(total_upt, na.rm = TRUE))
+
+NTD_ENERGY |>
+  mutate(`NTD ID` = as.character(`NTD ID`)) |>
+  inner_join(
+    NTD_SERVICE,
+    join_by(`NTD ID` == NTD_ID, Mode == mode, `Agency Name` == AGENCY)
+  ) |>
+  group_by(uza_name) |>
+  summarize(total_biodiesel = sum(`Gallons of Bio-Diesel`, na.rm = TRUE)) |>
+  arrange(desc(total_biodiesel)) |>
+  head(1)
+```
+
+```{r}
+# Next, we merge the three core datasets and compute total greenhouse gas emissions per Agency and Mode:
+complete_transit_data <- NTD_SERVICE |>
+    inner_join(
+      NTD_ENERGY |> mutate(`NTD ID` = as.character(`NTD ID`)),
+      join_by(NTD_ID == `NTD ID`, mode == Mode, AGENCY == `Agency Name`)
+    ) |>
+    inner_join(
+      EIA_SEP_REPORT,
+      join_by(state == abbreviation)
+    ) |>
+    mutate(
+        emissions_electricity = (`Kilowatt hours of Electric Battery` + `Kilowatt hours of Electric Propulsion`) * (CO2_MWh / 1e6),
+        emissions_diesel = `Gallons of Diesel Fuel` * 22.4,
+        emissions_cng = `Gallons of Compressed Natural Gas` * 120.6 / 1.2,
+        total_emissions_lbs = emissions_electricity + emissions_diesel + emissions_cng
+    )
+```
+
+```{r}
+# Next, we normalize emissions by passenger usage metrics to evaluate operational efficiency:
+agency_efficiency <- complete_transit_data |>
+    group_by(AGENCY, state) |>
+    summarize(
+        total_emissions = sum(total_emissions_lbs, na.rm = TRUE),
+        total_upt = sum(total_upt, na.rm = TRUE),
+        total_passenger_miles = sum(sum_passenger_miles, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    filter(total_upt > 100000) |>
+    mutate(
+        emissions_per_upt = total_emissions / total_upt,
+        emissions_per_mile = total_emissions / total_passenger_miles
+    )
+```
+
+```{r}
+# 1. Build the complete merged transit dataset (Agency + Mode grain)
+complete_transit_data <- NTD_SERVICE |>
+    inner_join(
+      NTD_ENERGY |> mutate(`NTD ID` = as.character(`NTD ID`)),
+      join_by(NTD_ID == `NTD ID`, mode == Mode, AGENCY == `Agency Name`)
+    ) |>
+    inner_join(
+      EIA_SEP_REPORT,
+      join_by(state == abbreviation)
+    ) |>
+    mutate(
+        # Calculate emissions by fuel source
+        emissions_electricity = (`Kilowatt hours of Electric Battery` + `Kilowatt hours of Electric Propulsion`) * (CO2_MWh / 1e6),
+        emissions_diesel = `Gallons of Diesel Fuel` * 22.4,
+        emissions_cng = `Gallons of Compressed Natural Gas` * 120.6 / 1.2,
+        
+        # Total emissions in pounds
+        total_emissions_lbs = emissions_electricity + emissions_diesel + emissions_cng
+    )
+
+# 2. Task Output 1: Summary table of total emissions by Agency and Mode (Top 10 highest emitters)
+agency_mode_emissions <- complete_transit_data |>
+    group_by(AGENCY, mode, state) |>
+    summarize(
+        total_upt = sum(total_upt, na.rm = TRUE),
+        total_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    arrange(desc(total_emissions_lbs))
+
+# Display the top emitting agency-mode pairs
+print("Top Emitters by Agency and Mode:")
+print(head(agency_mode_emissions, 10))
+
+# 3. Task Output 2: State-level aggregation for environmental impact reporting
+state_emissions_summary <- complete_transit_data |>
+    group_by(state, primary_source) |>
+    summarize(
+        agency_count = n_distinct(AGENCY),
+        total_state_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
+        avg_co2_mwh = mean(CO2_MWh, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    arrange(desc(total_state_emissions_lbs))
+
+print("Emissions Summary by State and Primary Energy Source:")
+print(head(state_emissions_summary, 10))
+```
+
+
+<details>
+<summary><strong>Show Code and Output: Transit Emissions Analysis</strong></summary>
+
+```{r}
+#| echo: true
+# Build the complete merged transit dataset (Agency + Mode grain)
+complete_transit_data <- NTD_SERVICE |>
+    inner_join(
+      NTD_ENERGY |> mutate(`NTD ID` = as.character(`NTD ID`)),
+      join_by(NTD_ID == `NTD ID`, mode == Mode, AGENCY == `Agency Name`)
+    ) |>
+    inner_join(
+      EIA_SEP_REPORT,
+      join_by(state == abbreviation)
+    ) |>
+    mutate(
+        # Calculate emissions by fuel source
+        emissions_electricity = (`Kilowatt hours of Electric Battery` + `Kilowatt hours of Electric Propulsion`) * (CO2_MWh / 1e6),
+        emissions_diesel = `Gallons of Diesel Fuel` * 22.4,
+        emissions_cng = `Gallons of Compressed Natural Gas` * 120.6 / 1.2,
+        
+        # Total emissions in pounds
+        total_emissions_lbs = emissions_electricity + emissions_diesel + emissions_cng
+    )
+
+# Create summary table of total emissions by Agency and Mode (Top 10 highest emitters)
+agency_mode_emissions <- complete_transit_data |>
+    group_by(AGENCY, mode, state) |>
+    summarize(
+        total_upt = sum(total_upt, na.rm = TRUE),
+        total_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    arrange(desc(total_emissions_lbs))
+
+print("Top Emitters by Agency and Mode:")
+print(head(agency_mode_emissions, 10))
+```
+</details>
+
+```{r}
+#| echo: true
+library(DT)
+library(formattable)
+
+# Format the top agency emissions table with conditional background color scaling
+complete_transit_data |>
+  group_by(AGENCY, mode, state) |>
+  summarize(
+    total_upt = sum(total_upt, na.rm = TRUE),
+    total_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  arrange(desc(total_emissions_lbs)) |>
+  head(15) |>
+  mutate(
+    total_emissions_lbs = comma(total_emissions_lbs, digits = 0),
+    total_upt = comma(total_upt, digits = 0)
+  ) |>
+  datatable(
+    options = list(pageLength = 5, dom = 'tip'),
+    caption = htmltools::tags$caption(
+      style = 'caption-side: top; text-align: left; font-weight: bold; font-size: 1.1em;',
+      'Table: Top 15 Transit Agency-Mode Pairs by Greenhouse Gas Emissions'
+    ),
+    colnames = c("Agency", "Mode", "State", "Total UPT", "Total Emissions (lbs)")
+  )
+```
+
+<details>
+<summary><strong>Show Code and Output: Transit Emissions Analysis</strong></summary>
+```{R}
+# State-level aggregation for environmental impact reporting
+state_emissions_summary <- complete_transit_data |>
+    group_by(state, primary_source) |>
+    summarize(
+        agency_count = n_distinct(AGENCY),
+        total_state_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
+        avg_co2_mwh = mean(CO2_MWh, na.rm = TRUE),
+        .groups = "drop"
+    ) |>
+    arrange(desc(total_state_emissions_lbs))
+
+print("Emissions Summary by State and Primary Energy Source:")
+print(head(state_emissions_summary, 10))
+```
+<details>
+```{r}
+#| echo: true
+library(plotly)
+
+# Create an interactive scatter plot of UPT vs Total Emissions
+p <- complete_transit_data |>
+  group_by(AGENCY, mode, state) |>
+  summarize(
+    total_upt = sum(total_upt, na.rm = TRUE),
+    total_emissions_lbs = sum(total_emissions_lbs, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  filter(total_emissions_lbs > 0 & total_upt > 0) |>
+  ggplot(aes(x = total_upt, y = total_emissions_lbs, color = mode, 
+             text = paste0("Agency: ", AGENCY, 
+                           "<br>State: ", state, 
+                           "<br>Emissions (lbs):, ", scales::comma(total_emissions_lbs),
+                           "<br>UPT: ", scales::comma(total_upt)))) +
+  geom_point(alpha = 0.7, size = 3) +
+  scale_y_log10(labels = scales::label_comma()) +
+  scale_x_log10(labels = scales::label_comma()) +
+  labs(
+    title = "Transit Ridership vs. Greenhouse Gas Emissions by Mode",
+    subtitle = "Log-scale comparison of annual passenger trips against carbon output",
+    x = "Total Unlinked Passenger Trips (UPT) [Log Scale]",
+    y = "Total Emissions (lbs CO2e) [Log Scale]",
+    color = "Transit Mode"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 14),
+    legend.position = "right"
+  )
+
+plotly::ggplotly(p, tooltip = "text") |>
+  layout(hoverlabel = list(bgcolor = "white", font = list(size = 12)))
 ```
