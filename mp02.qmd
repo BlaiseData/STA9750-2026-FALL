@@ -11,6 +11,8 @@ execute:
   message: false
 ---
 
+![U.S. public transit fleets](train.jpg)
+
 What actually powers America’s transit fleets behind the scenes? Is your local transit system as green as it claims? What commodities run these systems?
 
 Public transportation is often celebrated as the backbone of sustainable urban mobility, yet its actual environmental footprint varies dramatically across geographic regions, operational modes, and local energy grids. This report evaluates nationwide public transit efficiency using an integrated dataset from the National Transit Database (NTD) and the U.S. Energy Information Administration (EIA). We'll be exploring energy & commodity footprints, state grid intensity integration, and efficiency leaders & outliers.
@@ -23,7 +25,6 @@ library(tidyverse)
 library(stringr)
 library(httr2)
 library(rvest)
-library(gt)
 
 get_eia_sep <- function(state, abbr){
     library(tidyverse)
@@ -205,8 +206,7 @@ load_ntd_service <- function(){
 NTD_SERVICE <- load_ntd_service()
 ```
 
-To integrate state-level environmental data with transit energy consumption, the relational architecture below relies on NTD_SERVICE as a necessary bridge between datasets. Because NTD_ENERGY tracks fuel metrics without regional indicators, it is first linked to NTD_SERVICE using a compound key of agency ID and mode of transportation to accurately align operational metrics across specific transit modes. Once merged, the State variable enables a second link to the EIA_SEP_REPORT table. As illustrated in the diagram, this step-by-step pipeline combines agency-level fuel data with state-level emissions and power grid characteristics.
-
+# Transit Data Structure
 ```{r}
 #| echo: true
 # Design the relationship diagram
@@ -227,6 +227,9 @@ digraph {
 ")
 ```
 
+To integrate state-level environmental data with transit energy consumption, the relational architecture above relies on NTD_SERVICE as a necessary bridge between datasets. Because NTD_ENERGY tracks fuel metrics without regional indicators, it is first linked to NTD_SERVICE using a compound key of agency ID and mode of transportation to accurately align operational metrics across specific transit modes. Once merged, the State variable enables a second link to the EIA_SEP_REPORT table. As illustrated in the diagram, this step-by-step pipeline combines agency-level fuel data with state-level emissions and power grid characteristics.
+
+# Emission Data Exploration
 ```{r}
 #| echo: true
 # We need to recode the technical transit mode abbreviations into readable descriptions:
@@ -251,6 +254,9 @@ NTD_ENERGY <- NTD_ENERGY |>
 
 ```{r}
 #| echo: true
+# Construct a gt table showcasing the 5 dirtiest state electricity mixes:
+library(gt)
+
 EIA_SEP_REPORT |>
   arrange(desc(CO2_MWh)) |>
   head(5) |>
