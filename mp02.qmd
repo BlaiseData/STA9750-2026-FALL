@@ -737,9 +737,9 @@ kable(winners_summary,
   kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
 ```
 
-##Grand Transit Analytics (GTA) Announces National Green Transit Award Winners for 2026
+## Grand Transit Analytics (GTA) Announces National Green Transit Award Winners for 2026
 
-Grand Transit Analytics (GTA) Announces National Green Transit Award Winners for 2026
+GOOD NEWS!: Not every corporation seems to be on a mission to make summer permanent! Grand Transit Analytics (GTA) Announces National Green Transit Award Winners for 2026
 NEW YORK, NY — The Grand Transit Analytics (GTA) initiative has officially published its comprehensive nationwide environmental audit of public transit networks for Fall 2026. Public transit remains the backbone of urban climate resilience, but efficiency varies wildly across state lines and operating modes. Below are the official winners of the 2026 GTA Green Transit Awards.
 
 **1. The Greenest Transit Agency Award **
@@ -747,21 +747,21 @@ Winner: `r greenest_agency$AGENCY` (`r greenest_agency$state`)
 
 Winning Metric: `r round(greenest_agency$emissions_per_pmt, 4)` kg CO₂ per Passenger Mile Traveled (PMT)
 
-The Insight: While the national median transit network hovers significantly higher in carbon overhead, top-tier operators demonstrate that high-density ridership scales emissions per passenger down to microscopic margins. `r greenest_agency$AGENCY` sets the gold standard for carbon efficiency per passenger mile.
+The Insight: While every organization seems to be in a competition of who could scrape off the most off of the Ozone as national median transit network hovers significantly higher in carbon overhead, top-tier operators demonstrate that high-density ridership scales emissions per passenger down to microscopic margins. `r greenest_agency$AGENCY` sets the gold standard for carbon efficiency per passenger mile.
 
 **2. Most Emissions Avoided Award**
 Winner: `r top_avoided$AGENCY` (`r top_avoided$state`)
 
 Winning Metric: `r round(top_avoided$emissions_avoided_kg / 1e6, 1)` Million kg CO₂ Avoided
 
-The Insight: Evaluated against equivalent single-occupancy vehicle (SOV) travel under EPA standards, `r top_avoided$AGENCY` successfully kept millions of kilograms of greenhouse gases out of the atmosphere by moving heavy volumes of commuters away from individual cars.
+The Insight: Despite producing some of the worlds most iconic subterranean mutants, New York City's own MTA managed to be on the good side of these rewards. Evaluated against equivalent single-occupancy vehicle (SOV) travel under EPA standards, `r top_avoided$AGENCY` successfully kept millions of kilograms of greenhouse gases out of the atmosphere by moving heavy volumes of commuters away from individual cars.
 
 **3. Vanguard Electrification Award (Custom Award)**
 Winner: `r best_electrification$AGENCY` (`r best_electrification$state`)
 
 Winning Metric: Winning Metric: `r round(best_electrification$electrification_pct, 1)`% Electrification Share
 
-The Insight: Moving beyond simple ridership counts, this custom award honors systems achieving near-total grid integration. `r best_electrification$AGENCY` proves that aggressive capital investments in electric propulsion yield immediate, zero-emission operational profiles.
+The Insight: Do we have Nikola Tesla himself working for this establishment? Talk about over achieving! These guys might single handedly slow down the rate of global warming. Moving beyond simple ridership counts, this custom award honors systems achieving near-total grid integration. `r best_electrification$AGENCY` proves that aggressive capital investments in electric propulsion yield immediate, zero-emission operational profiles.
 
 **4. The "Smog Spewer" Booby Prize (Worst Of Award)**
 Winner: `r worst_agency$AGENCY` (`r worst_agency$state`)
