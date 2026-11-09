@@ -229,7 +229,7 @@ digraph {
 
 To integrate state-level environmental data with transit energy consumption, the relational architecture above relies on NTD_SERVICE as a necessary bridge between datasets. Because NTD_ENERGY tracks fuel metrics without regional indicators, it is first linked to NTD_SERVICE using a compound key of agency ID and mode of transportation to accurately align operational metrics across specific transit modes. Once merged, the State variable enables a second link to the EIA_SEP_REPORT table. As illustrated in the diagram, this step-by-step pipeline combines agency-level fuel data with state-level emissions and power grid characteristics.
 
-# Emission Data Exploration
+# Emission Data Exploration and Analysis
 ```{r}
 #| echo: true
 # We need to recode the technical transit mode abbreviations into readable descriptions:
@@ -251,6 +251,28 @@ NTD_ENERGY <- NTD_ENERGY |>
         TRUE ~ "Other/Unknown"
     ))
 ```
+
+```{r}
+#| echo: true
+# Create a slice_max chart showing the most expensive states in terms of electricity billing
+library(tidyverse)
+library(gt)
+
+top_expensive <- EIA_SEP_REPORT |>
+  slice_max(electricity_price_MWh, n = 5)
+
+ggplot(top_expensive, aes(x = reorder(state, electricity_price_MWh), y = electricity_price_MWh, fill = state)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  labs(
+    title = "Top 5 States with the Most Expensive Retail Electricity",
+    x = "State",
+    y = "Retail Price ($/MWh)"
+  ) +
+  theme_minimal()
+```
+
+Hawaii stands as a major outlier as the most expensive state for retail electricity, reaching $380/MWh. Hawaii's price tag sits roughly 37% higher than second-place California and far above the rest of the top five, which includes Connecticut, Rhode Island, and Massachusetts. This cost inflation is primarily driven by Hawaii’s extreme geographic isolation and lack of mainland grid interconnections, forcing each island to operate its own localized grid system without the benefit of shared power distribution across state lines. On top of that, b ecause Hawaii lacks domestic natural gas or coal infrastructure, it relies heavily on ocean cargo tankers to import fuel, adding massive shipping logistics costs directly onto consumer utility bills.
 
 ```{r}
 #| echo: true
@@ -285,22 +307,220 @@ EIA_SEP_REPORT |>
     )
   ) |>
   opt_stylize(style = 6, color = "gray")
+
+us_weighted_co2 <- EIA_SEP_REPORT |>
+  summarize(
+    weighted_co2 = sum(CO2_MWh * generation_MWh, na.rm = TRUE) / sum(generation_MWh, na.rm = TRUE)
+  ) |>
+  pull(weighted_co2)
 ```
 
-Based on the table, West Virginia stands out with the highest carbon intensity in its power grid at 1,912 lbs of CO₂ per MWh generated, closely followed by Kentucky (1,744 lbs) and Wyoming (1,724 lbs). Coal serves as the primary energy source driving these elevated emissions in four out of the top five states, with Hawaii standing as the sole exception by relying on petroleum. However, Hawaii also exhibits a distinct profile compared to the continental states: its total power generation remains relatively low at 9.2M MWh (whereas the other four states produce between 40.7M and 67.0M MWh) and its electricity price reaches a staggering \$380 per MWh, which is more than triple the \$91 to \$111 per MWh range seen across the rest of the top emitters.
+On average, the U.S. produces approximately `r round(us_weighted_co2, 1)` lbs of CO2 per MWh of electricity generated. Based on the table, West Virginia stands out with the highest carbon intensity in its power grid at 1,912 lbs of CO₂ per MWh generated, closely followed by Kentucky (1,744 lbs) and Wyoming (1,724 lbs). Coal serves as the primary energy source driving these elevated emissions in four out of the top five states, with Hawaii standing as the sole exception by relying on petroleum. However, Hawaii also exhibits a distinct profile compared to the continental states: its total power generation remains relatively low at 9.2M MWh (whereas the other four states produce between 40.7M and 67.0M MWh) and, again, its electricity price reaches a staggering \$380 per MWh, which is more than triple the \$91 to \$111 per MWh range seen across the rest of the top emitters. 
 
 ```{r}
 #| echo: true
-# Build an interactive plotly scatter plot to display state electricity pricing:
-library(plotly)
-p <- EIA_SEP_REPORT |>
-    ggplot(aes(x = generation_MWh, y = electricity_price_MWh, text = state, color = primary_source)) +
-    geom_point(size = 3) +
-    scale_x_log10() +
-    labs(title = "Electricity Generation vs. Retail Price by State", x = "Total Generation (MWh)", y = "Retail Price ($/MWh)") +
-    theme_minimal()
-ggplotly(p, tooltip = "text")
+rare_sources <- EIA_SEP_REPORT |>
+  group_by(primary_source) |>
+  summarise(
+    state_count = n(),
+    total_generation = sum(generation_MWh, na.rm = TRUE),
+    avg_price = mean(electricity_price_MWh, na.rm = TRUE),
+    states = paste(state, collapse = ", ")
+  ) |>
+  arrange(state_count, total_generation) |>
+  head(3)
+
+rare_sources |>
+  gt() |>
+  tab_header(
+    title = "The Rarest Primary Energy Sources in the U.S.",
+    subtitle = "Ranked by state adoption and total generation volume"
+  ) |>
+  cols_label(
+    primary_source = "Energy Source",
+    state_count = "States Using",
+    total_generation = "Total Generation (MWh)",
+    avg_price = "Avg Price ($/MWh)",
+    states = "State(s)"
+  ) |>
+  fmt_number(columns = c(total_generation, avg_price), decimals = 0)
+
+ny_co2 <- EIA_SEP_REPORT |> filter(state == "New York") |> pull(CO2_MWh)
+tx_co2 <- EIA_SEP_REPORT |> filter(state == "Texas") |> pull(CO2_MWh)
+
+cleanliness_ratio <- tx_co2 / ny_co2
 ```
+
+Petroleum is by far the rarest primary energy source in the United States, used primarily by just one state: Hawaii. While Wind and Hydroelectric serve as the dominant primary energy sources for four states. Hawaii remains the sole state relying on liquid petroleum due to historical power plant infrastructure built around ocean-shipped fuel oil. Transitioning an isolated island grid away from heavy petroleum requires substantial investments in battery storage and grid modernization, keeping petroleum as Hawaii's primary baseline energy source while mainland states utilize domestic natural gas, coal, or vast renewable networks.
+
+**Fun Fact:** While Texas relies heavily on conventional fossil fuel generation, New York’s energy grid leans significantly on nuclear and hydroelectric power. Factoring in emission intensities, New York's energy mix is `r round(cleanliness_ratio, 1)` times cleaner than that of Texas.
+
+```{r}
+#| echo: true
+library(tidyverse)
+library(gt)
+
+top_fuel_agencies <- NTD_ENERGY |>
+  mutate(across(starts_with("Gallons of"), ~ as.numeric(gsub(",", "", .x)))) |>
+  mutate(total_fuel = rowSums(pick(starts_with("Gallons of")), na.rm = TRUE)) |>
+  group_by(`Agency Name`) |>
+  summarise(
+    Diesel = sum(`Gallons of Diesel Fuel`, na.rm = TRUE),
+    CNG = sum(`Gallons of Compressed Natural Gas`, na.rm = TRUE),
+    Gasoline = sum(`Gallons of Gasoline`, na.rm = TRUE),
+    Bio_Diesel = sum(`Gallons of Bio-Diesel`, na.rm = TRUE),
+    LNG = sum(`Gallons of Liquified Nat Gas`, na.rm = TRUE),
+    LPG = sum(`Gallons of Liquified Petroleum Gas`, na.rm = TRUE),
+    Total_Fuel = sum(total_fuel, na.rm = TRUE)
+  ) |>
+  slice_max(Total_Fuel, n = 5, with_ties = FALSE)
+
+top_fuel_agencies |>
+  gt() |>
+  tab_header(
+    title = "Top Transit Agencies by Total Fuel Consumption",
+    subtitle = "Breakdown by Fuel Type (Gallons)"
+  ) |>
+  fmt_number(columns = everything(), decimals = 0) |>
+  data_color(
+    columns = Total_Fuel,
+    colors = scales::col_numeric(
+      palette = c("lightblue", "dodgerblue", "navy"),
+      domain = NULL
+    )
+  ) |>
+  opt_stylize(style = 6, color = "blue")
+```
+If we break this table down into percentages representing fuel consumption for each agency reveals stark regional differences in operational strategies: NJ TRANSIT Corporation relies overwhelmingly on traditional diesel (91.4%), supplemented by minor shares of Gasoline (4.9%) and CNG (3.6%). MTA New York City Transit maintains a slightly more diversified mix, with diesel representing 74.0%, Compressed Natural Gas (CNG) accounting for 15.5%, and Gasoline making up 10.5%. In sharp contrast, Los Angeles County Metropolitan Transportation Authority (LACMTA) operates almost exclusively on an alternative-gas model, with CNG dominating 96.8% of its fuel usage and Gasoline taking the remaining 3.2%—recording 0% traditional diesel. Northeast Illinois Regional Commuter Railroad Corporation (Metra) operates dedicated heavy rail running on 100.0% diesel, and Massachusetts Bay Transportation Authority (MBTA) balances its intake at 87.9% diesel, 6.5% CNG, and 5.5% Gasoline.
+
+```{r}
+#| echo: true
+library(ggplot2)
+library(scales)
+
+# Sum up totals across all agencies for each fuel column and pivot longer for plotting
+fuel_summary <- NTD_ENERGY |>
+  mutate(across(starts_with("Gallons of"), ~ as.numeric(gsub(",", "", .x)))) |>
+  summarise(
+    Diesel = sum(`Gallons of Diesel Fuel`, na.rm = TRUE),
+    CNG = sum(`Gallons of Compressed Natural Gas`, na.rm = TRUE),
+    Gasoline = sum(`Gallons of Gasoline`, na.rm = TRUE),
+    Bio_Diesel = sum(`Gallons of Bio-Diesel`, na.rm = TRUE),
+    LNG = sum(`Gallons of Liquified Nat Gas`, na.rm = TRUE),
+    LPG = sum(`Gallons of Liquified Petroleum Gas`, na.rm = TRUE),
+    Ethanol = sum(`Gallons of Ethanol`, na.rm = TRUE),
+    Kerosene = sum(`Gallons of Kerosene`, na.rm = TRUE),
+    Bunker = sum(`Gallons of Bunker Fuel`, na.rm = TRUE)
+  ) |>
+  pivot_longer(everything(), names_to = "fuel_type", values_to = "total_gallons") |>
+  arrange(desc(total_gallons))
+
+ggplot(fuel_summary, aes(x = reorder(fuel_type, total_gallons), y = total_gallons, fill = fuel_type)) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  scale_y_continuous(labels = label_comma()) +
+  labs(
+    title = "Total Fuel Usage Across U.S. Public Transit by Type",
+    x = "Fuel Type",
+    y = "Total Consumption (Gallons)"
+  ) +
+  theme_minimal()
+
+least_common_fuel <- NTD_ENERGY |>
+  mutate(across(starts_with("Gallons of"), ~ as.numeric(gsub(",", "", .x)))) |>
+  summarise(across(starts_with("Gallons of"), ~ sum(.x, na.rm = TRUE))) |>
+  pivot_longer(everything(), names_to = "fuel_type", values_to = "total") |>
+  slice_min(total, n = 1) |>
+  pull(fuel_type)
+```
+
+Traditional diesel is by far the most heavily consumed fuel source at over 400 million gallons while Compressed Natural Gas (CNG) trails **far** behind it at over 150 million gallons as agencies increasingly transition fleets toward cleaner-burning gaseous alternatives. Across all reporting U.S. public transit agencies, the least commonly used fuel source is `r least_common_fuel`.
+
+```{r}
+#| echo: true
+# Structure a lollipop chart by grouping by agency/service and sum Unlinked Passenger Trips (UPT)
+library(tidyverse)
+library(scales)
+
+top_upt_services <- NTD_SERVICE |>
+  group_by(AGENCY) |>
+  summarise(total_upt = sum(total_upt, na.rm = TRUE), .groups = "drop") |>
+  slice_max(total_upt, n = 5, with_ties = FALSE)
+
+ggplot(top_upt_services, aes(x = reorder(AGENCY, total_upt), y = total_upt)) +
+  geom_segment(aes(x = reorder(AGENCY, total_upt), xend = reorder(AGENCY, total_upt), y = 0, yend = total_upt), color = "forestgreen", linewidth = 1.2) +
+  geom_point(size = 4, color = "darkgreen") +
+  coord_flip() +
+  scale_y_continuous(labels = label_comma()) +
+  labs(
+    title = "Top 5 Transit Services by Annual Unlinked Passenger Trips (UPT)",
+    x = "Transit Service / Agency",
+    y = "Annual UPT"
+  ) +
+  theme_minimal()
+
+# Examine nyc service trip lengths and averages by filtering, aggregating, and computing the passenger-miles-to-unlinked-passenger-trips ratio
+mta_avg_trip_length <- NTD_SERVICE |>
+  filter(str_detect(AGENCY, "MTA New York City Transit")) |>
+  summarise(avg_length = sum(sum_passenger_miles, na.rm = TRUE) / sum(total_upt, na.rm = TRUE)) |>
+  pull(avg_length)
+
+nyc_longest_trip <- NTD_SERVICE |>
+  filter(city %in% c("New York", "Brooklyn", "Jamaica", "Long Island City", "Flushing", "Staten Island") | 
+           state == "NY" & str_detect(AGENCY, "MTA|New York City")) |>
+  group_by(AGENCY) |>
+  summarise(
+    total_pmt = sum(sum_passenger_miles, na.rm = TRUE),
+    total_upt = sum(total_upt, na.rm = TRUE),
+    avg_trip_length = total_pmt / total_upt,
+    .groups = "drop"
+  ) |>
+  filter(total_upt > 0) |>
+  slice_max(avg_trip_length, n = 1)
+
+nyc_service_name <- nyc_longest_trip |> pull(AGENCY)
+nyc_max_length <- nyc_longest_trip |> pull(avg_trip_length)
+```
+
+An analysis of annual Unlinked Passenger Trips (UPT) demonstrates that MTA New York City Transit leads the nation by a massive margin, anchoring a top-tier group of high-volume urban transit providers alongside Chicago Transit Authority, Los Angeles County Metropolitan Transportation Authority (Metro), Washington Metropolitan Area Transit Authority (WMATA), and Massachusetts Bay Transportation Authority (MBTA). Within the nation's largest system, an average trip on MTA NYC Transit covers `r round(mta_avg_trip_length, 2)` miles. However, local route dynamics across the broader metropolitan area reveal significant variance; among all transit services operating within New York City boundaries, `r nyc_service_name` records the single longest average trip distance at `r round(nyc_max_length, 2)` miles.
+
+```{r}
+
+library(tidyverse)
+library(scales)
+
+bottom_5_states_pmt <- NTD_SERVICE |>
+  filter(state %in% c(state.abb, "DC", "PR")) |>
+  group_by(state) |>
+  summarise(total_pmt = sum(sum_passenger_miles, na.rm = TRUE), .groups = "drop") |>
+  slice_min(total_pmt, n = 5, with_ties = FALSE)
+
+ggplot(bottom_5_states_pmt, aes(x = reorder(state, total_pmt), y = total_pmt)) +
+  geom_segment(aes(x = state, xend = state, y = 0, yend = total_pmt), color = "gray80", linewidth = 0.8) +
+  geom_point(aes(color = state), size = 5, show.legend = FALSE) +
+  scale_y_continuous(labels = label_comma()) +
+  labs(
+    title = "Bottom 5 States with Fewest Passenger Miles Traveled",
+    x = "State",
+    y = "Total Miles Traveled (PMT)"
+  ) +
+  theme_minimal()
+
+missing_states <- tibble(state = state.abb, State_Name = state.name) |>
+  anti_join(NTD_SERVICE |> select(state) |> distinct(), by = "state") |>
+  pull(State_Name)
+
+missing_states_text <- if(length(missing_states) == 0) "None, all 50 states are represented." else paste(missing_states, collapse = ", ")
+```
+
+At the opposite end of the spectrum, nationwide service metrics show severe geographic disparities in public transit utilization. Wyoming (WY), South Dakota (SD), New Hampshire (NH), North Dakota (ND), and Mississippi (MS) have low population densities and limited transit infrastructure, resulting in minimal aggregate mileage. 
+
+**Note:**Despite these differences, a quick check confirms that every state is included in the dataset: `r if(length(missing_states) == 0) "Yes, all 50 states are represented in the dataset." else paste("No, missing states:", missing_states_text)`
+
+
+
+
+
 
 ```{r}
 #| echo: true
@@ -533,4 +753,37 @@ p <- complete_transit_data |>
 
 plotly::ggplotly(p, tooltip = "text") |>
   layout(hoverlabel = list(bgcolor = "white", font = list(size = 12)))
+```
+
+```{r}
+#| echo: true
+# Build an interactive plotly scatter plot to display state electricity pricing:
+
+library(ggplot2)
+library(plotly)
+library(scales)
+
+p <- ggplot(EIA_SEP_REPORT, aes(
+    x = generation_MWh, 
+    y = electricity_price_MWh,
+    color = primary_source,
+    text = paste0(
+      "<b>State:</b> ", state, "<br>",
+      "<b>Price:</b> $", round(electricity_price_MWh, 2), "/MWh<br>",
+      "<b>Generation:</b> ", comma(generation_MWh), " MWh<br>",
+      "<b>Source:</b> ", primary_source
+    )
+  )) +
+  geom_point(size = 3, alpha = 0.8) +
+  scale_x_log10(labels = label_comma()) + 
+  
+  scale_color_discrete(name = "Primary Energy Source") +
+  labs(
+    title = "Electricity Generation vs. Retail Price by State",
+    x = "Total Generation (MWh)",
+    y = "Retail Price ($/MWh)"
+  ) +
+  theme_minimal()
+
+ggplotly(p, tooltip = "text")
 ```
