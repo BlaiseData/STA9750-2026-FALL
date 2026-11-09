@@ -8097,8 +8097,8 @@ color: #333;
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="grViz html-widget html-fill-item" id="htmlwidget-c8ad1bbf9930b1053578" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-c8ad1bbf9930b1053578">{"x":{"diagram":"\ndigraph {\n  graph [layout = dot, rankdir = LR, nodesep = 0.8, ranksep = 1.0, fontname = \"Helvetica\"]\n  node [shape = box, style = \"filled,rounded\", fontname = \"Helvetica\", fontsize = 11, margin = 0.3]\n  edge [fontname = \"Helvetica\", fontsize = 9, color = \"#64748B\", fontcolor = \"#475569\"]\n  \n  EIA [label = \"EIA_SEP_REPORT\\l• State\\l• CO2 Emissions\\l• Energy Source\\l\", fillcolor = \"#E0F2FE\", color = \"#BAE6FD\"]\n  ENERGY [label = \"NTD_ENERGY\\l• Agency Id\\l• Agency Name\\l• Mode of Transit\\l• Fuel Consumption\\l\", fillcolor = \"#FCE7F3\", color = \"#FBCFE8\"]\n  SERVICE [label = \"NTD_SERVICE\\l• Agency Id\\l• State\\l• Agency Name\\l• Mode of Transit\\l• Total Passenger Trips\\l\", fillcolor = \"#DCFCE7\", color = \"#BBF7D0\"]\n  \n  ENERGY -> SERVICE [label = \" Join on NTD_ID & Mode \"]\n  SERVICE -> EIA [label = \" Join on State Abbreviation \"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div class="grViz html-widget html-fill-item" id="htmlwidget-17c1886f17506158aae8" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-17c1886f17506158aae8">{"x":{"diagram":"\ndigraph {\n  graph [layout = dot, rankdir = LR, nodesep = 0.8, ranksep = 1.0, fontname = \"Helvetica\"]\n  node [shape = box, style = \"filled,rounded\", fontname = \"Helvetica\", fontsize = 11, margin = 0.3]\n  edge [fontname = \"Helvetica\", fontsize = 9, color = \"#64748B\", fontcolor = \"#475569\"]\n  \n  EIA [label = \"EIA_SEP_REPORT\\l• State\\l• CO2 Emissions\\l• Energy Source\\l\", fillcolor = \"#E0F2FE\", color = \"#BAE6FD\"]\n  ENERGY [label = \"NTD_ENERGY\\l• Agency Id\\l• Agency Name\\l• Mode of Transit\\l• Fuel Consumption\\l\", fillcolor = \"#FCE7F3\", color = \"#FBCFE8\"]\n  SERVICE [label = \"NTD_SERVICE\\l• Agency Id\\l• State\\l• Agency Name\\l• Mode of Transit\\l• Total Passenger Trips\\l\", fillcolor = \"#DCFCE7\", color = \"#BBF7D0\"]\n  \n  ENERGY -> SERVICE [label = \" Join on NTD_ID & Mode \"]\n  SERVICE -> EIA [label = \" Join on State Abbreviation \"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <p>To integrate state-level environmental data with transit energy consumption, the relational architecture above relies on NTD_SERVICE as a necessary bridge between datasets. Because NTD_ENERGY tracks fuel metrics without regional indicators, it is first linked to NTD_SERVICE using a compound key of agency ID and mode of transportation to accurately align operational metrics across specific transit modes. Once merged, the State variable enables a second link to the EIA_SEP_REPORT table. As illustrated in the diagram, this step-by-step pipeline combines agency-level fuel data with state-level emissions and power grid characteristics.</p>
@@ -8164,20 +8164,20 @@ color: #333;
 <span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">opt_stylize</span>(<span class="at">style =</span> <span class="dv">6</span>, <span class="at">color =</span> <span class="st">&quot;gray&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div id="pfkbvyilbt" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#pfkbvyilbt table {
+<div id="qomaxgcfmq" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#qomaxgcfmq table {
 font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 -webkit-font-smoothing: antialiased;
 -moz-osx-font-smoothing: grayscale;
 }
-#pfkbvyilbt thead, #pfkbvyilbt tbody, #pfkbvyilbt tfoot, #pfkbvyilbt tr, #pfkbvyilbt td, #pfkbvyilbt th {
+#qomaxgcfmq thead, #qomaxgcfmq tbody, #qomaxgcfmq tfoot, #qomaxgcfmq tr, #qomaxgcfmq td, #qomaxgcfmq th {
 border-style: none;
 }
-#pfkbvyilbt p {
+#qomaxgcfmq p {
 margin: 0;
 padding: 0;
 }
-#pfkbvyilbt .gt_table {
+#qomaxgcfmq .gt_table {
 display: table;
 border-collapse: collapse;
 line-height: normal;
@@ -8202,11 +8202,11 @@ border-left-style: none;
 border-left-width: 2px;
 border-left-color: #D3D3D3;
 }
-#pfkbvyilbt .gt_caption {
+#qomaxgcfmq .gt_caption {
 padding-top: 4px;
 padding-bottom: 4px;
 }
-#pfkbvyilbt .gt_title {
+#qomaxgcfmq .gt_title {
 color: #333333;
 font-size: 125%;
 font-weight: initial;
@@ -8217,7 +8217,7 @@ padding-right: 5px;
 border-bottom-color: #FFFFFF;
 border-bottom-width: 0;
 }
-#pfkbvyilbt .gt_subtitle {
+#qomaxgcfmq .gt_subtitle {
 color: #333333;
 font-size: 85%;
 font-weight: initial;
@@ -8228,7 +8228,7 @@ padding-right: 5px;
 border-top-color: #FFFFFF;
 border-top-width: 0;
 }
-#pfkbvyilbt .gt_heading {
+#qomaxgcfmq .gt_heading {
 background-color: #FFFFFF;
 text-align: center;
 border-bottom-color: #FFFFFF;
@@ -8239,12 +8239,12 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#pfkbvyilbt .gt_bottom_border {
+#qomaxgcfmq .gt_bottom_border {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #5F5F5F;
 }
-#pfkbvyilbt .gt_col_headings {
+#qomaxgcfmq .gt_col_headings {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #5F5F5F;
@@ -8258,7 +8258,7 @@ border-right-style: none;
 border-right-width: 1px;
 border-right-color: #D3D3D3;
 }
-#pfkbvyilbt .gt_col_heading {
+#qomaxgcfmq .gt_col_heading {
 color: #FFFFFF;
 background-color: #5F5F5F;
 font-size: 100%;
@@ -8277,7 +8277,7 @@ padding-left: 5px;
 padding-right: 5px;
 overflow-x: hidden;
 }
-#pfkbvyilbt .gt_column_spanner_outer {
+#qomaxgcfmq .gt_column_spanner_outer {
 color: #FFFFFF;
 background-color: #5F5F5F;
 font-size: 100%;
@@ -8288,13 +8288,13 @@ padding-bottom: 0;
 padding-left: 4px;
 padding-right: 4px;
 }
-#pfkbvyilbt .gt_column_spanner_outer:first-child {
+#qomaxgcfmq .gt_column_spanner_outer:first-child {
 padding-left: 0;
 }
-#pfkbvyilbt .gt_column_spanner_outer:last-child {
+#qomaxgcfmq .gt_column_spanner_outer:last-child {
 padding-right: 0;
 }
-#pfkbvyilbt .gt_column_spanner {
+#qomaxgcfmq .gt_column_spanner {
 border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #5F5F5F;
@@ -8305,10 +8305,10 @@ overflow-x: hidden;
 display: inline-block;
 width: 100%;
 }
-#pfkbvyilbt .gt_spanner_row {
+#qomaxgcfmq .gt_spanner_row {
 border-bottom-style: hidden;
 }
-#pfkbvyilbt .gt_group_heading {
+#qomaxgcfmq .gt_group_heading {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -8333,7 +8333,7 @@ border-right-color: #D3D3D3;
 vertical-align: middle;
 text-align: left;
 }
-#pfkbvyilbt .gt_empty_group_heading {
+#qomaxgcfmq .gt_empty_group_heading {
 padding: 0.5px;
 color: #333333;
 background-color: #FFFFFF;
@@ -8347,13 +8347,13 @@ border-bottom-width: 2px;
 border-bottom-color: #5F5F5F;
 vertical-align: middle;
 }
-#pfkbvyilbt .gt_from_md > :first-child {
+#qomaxgcfmq .gt_from_md > :first-child {
 margin-top: 0;
 }
-#pfkbvyilbt .gt_from_md > :last-child {
+#qomaxgcfmq .gt_from_md > :last-child {
 margin-bottom: 0;
 }
-#pfkbvyilbt .gt_row {
+#qomaxgcfmq .gt_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -8371,7 +8371,7 @@ border-right-color: #D5D5D5;
 vertical-align: middle;
 overflow-x: hidden;
 }
-#pfkbvyilbt .gt_stub {
+#qomaxgcfmq .gt_stub {
 color: #333333;
 background-color: #D5D5D5;
 font-size: 100%;
@@ -8383,7 +8383,7 @@ border-right-color: #D5D5D5;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pfkbvyilbt .gt_stub_row_group {
+#qomaxgcfmq .gt_stub_row_group {
 color: #333333;
 background-color: #FFFFFF;
 font-size: 100%;
@@ -8396,13 +8396,13 @@ padding-left: 5px;
 padding-right: 5px;
 vertical-align: top;
 }
-#pfkbvyilbt .gt_row_group_first td {
+#qomaxgcfmq .gt_row_group_first td {
 border-top-width: 2px;
 }
-#pfkbvyilbt .gt_row_group_first th {
+#qomaxgcfmq .gt_row_group_first th {
 border-top-width: 2px;
 }
-#pfkbvyilbt .gt_summary_row {
+#qomaxgcfmq .gt_summary_row {
 color: #333333;
 background-color: #FFFFFF;
 text-transform: inherit;
@@ -8411,14 +8411,14 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pfkbvyilbt .gt_first_summary_row {
+#qomaxgcfmq .gt_first_summary_row {
 border-top-style: solid;
 border-top-color: #5F5F5F;
 }
-#pfkbvyilbt .gt_first_summary_row.thick {
+#qomaxgcfmq .gt_first_summary_row.thick {
 border-top-width: 2px;
 }
-#pfkbvyilbt .gt_last_summary_row {
+#qomaxgcfmq .gt_last_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -8427,7 +8427,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #5F5F5F;
 }
-#pfkbvyilbt .gt_grand_summary_row {
+#qomaxgcfmq .gt_grand_summary_row {
 color: #333333;
 background-color: #D5D5D5;
 text-transform: inherit;
@@ -8436,7 +8436,7 @@ padding-bottom: 8px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pfkbvyilbt .gt_first_grand_summary_row {
+#qomaxgcfmq .gt_first_grand_summary_row {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -8445,7 +8445,7 @@ border-top-style: double;
 border-top-width: 6px;
 border-top-color: #5F5F5F;
 }
-#pfkbvyilbt .gt_last_grand_summary_row_top {
+#qomaxgcfmq .gt_last_grand_summary_row_top {
 padding-top: 8px;
 padding-bottom: 8px;
 padding-left: 5px;
@@ -8454,10 +8454,10 @@ border-bottom-style: double;
 border-bottom-width: 6px;
 border-bottom-color: #5F5F5F;
 }
-#pfkbvyilbt .gt_striped {
+#qomaxgcfmq .gt_striped {
 background-color: #F4F4F4;
 }
-#pfkbvyilbt .gt_table_body {
+#qomaxgcfmq .gt_table_body {
 border-top-style: solid;
 border-top-width: 2px;
 border-top-color: #5F5F5F;
@@ -8465,7 +8465,7 @@ border-bottom-style: solid;
 border-bottom-width: 2px;
 border-bottom-color: #5F5F5F;
 }
-#pfkbvyilbt .gt_footnotes {
+#qomaxgcfmq .gt_footnotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -8478,7 +8478,7 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#pfkbvyilbt .gt_footnote {
+#qomaxgcfmq .gt_footnote {
 margin: 0px;
 font-size: 90%;
 padding-top: 4px;
@@ -8486,7 +8486,7 @@ padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pfkbvyilbt .gt_sourcenotes {
+#qomaxgcfmq .gt_sourcenotes {
 color: #333333;
 background-color: #FFFFFF;
 border-bottom-style: none;
@@ -8499,64 +8499,64 @@ border-right-style: none;
 border-right-width: 2px;
 border-right-color: #D3D3D3;
 }
-#pfkbvyilbt .gt_sourcenote {
+#qomaxgcfmq .gt_sourcenote {
 font-size: 90%;
 padding-top: 4px;
 padding-bottom: 4px;
 padding-left: 5px;
 padding-right: 5px;
 }
-#pfkbvyilbt .gt_left {
+#qomaxgcfmq .gt_left {
 text-align: left;
 }
-#pfkbvyilbt .gt_center {
+#qomaxgcfmq .gt_center {
 text-align: center;
 }
-#pfkbvyilbt .gt_right {
+#qomaxgcfmq .gt_right {
 text-align: right;
 font-variant-numeric: tabular-nums;
 }
-#pfkbvyilbt .gt_font_normal {
+#qomaxgcfmq .gt_font_normal {
 font-weight: normal;
 }
-#pfkbvyilbt .gt_font_bold {
+#qomaxgcfmq .gt_font_bold {
 font-weight: bold;
 }
-#pfkbvyilbt .gt_font_italic {
+#qomaxgcfmq .gt_font_italic {
 font-style: italic;
 }
-#pfkbvyilbt .gt_super {
+#qomaxgcfmq .gt_super {
 font-size: 65%;
 }
-#pfkbvyilbt .gt_footnote_marks {
+#qomaxgcfmq .gt_footnote_marks {
 font-size: 75%;
 vertical-align: 0.4em;
 position: initial;
 }
-#pfkbvyilbt .gt_asterisk {
+#qomaxgcfmq .gt_asterisk {
 font-size: 100%;
 vertical-align: 0;
 }
-#pfkbvyilbt .gt_indent_1 {
+#qomaxgcfmq .gt_indent_1 {
 text-indent: 5px;
 }
-#pfkbvyilbt .gt_indent_2 {
+#qomaxgcfmq .gt_indent_2 {
 text-indent: 10px;
 }
-#pfkbvyilbt .gt_indent_3 {
+#qomaxgcfmq .gt_indent_3 {
 text-indent: 15px;
 }
-#pfkbvyilbt .gt_indent_4 {
+#qomaxgcfmq .gt_indent_4 {
 text-indent: 20px;
 }
-#pfkbvyilbt .gt_indent_5 {
+#qomaxgcfmq .gt_indent_5 {
 text-indent: 25px;
 }
-#pfkbvyilbt .katex-display {
+#qomaxgcfmq .katex-display {
 display: inline-flex !important;
 margin-bottom: 0.75em !important;
 }
-#pfkbvyilbt div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#qomaxgcfmq div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
 height: 0px !important;
 }
 </style>
@@ -8634,8 +8634,8 @@ height: 0px !important;
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(p, <span class="at">tooltip =</span> <span class="st">&quot;text&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="plotly html-widget html-fill-item" id="htmlwidget-021b1851ac5dc7292bb5" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-021b1851ac5dc7292bb5">{"x":{"data":[{"x":[7.9868293975815376,7.8257560821603995,7.8252684058322055,7.4293142612908554,7.5708807876114479,7.6289734851547095,7.5457264350168201,7.7041060380008295,7.6096920344805179],"y":[113.80000000000001,100.7,110.60000000000001,108.3,90.700000000000003,79.299999999999997,99.700000000000003,110.5,91.400000000000006],"text":["Indiana","Kentucky","Missouri","Montana","Nebraska","North Dakota","Utah","West Virginia","Wyoming"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(248,118,109,1)"}},"hoveron":"points","name":"Coal","legendgroup":"Coal","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[7.3017988410988321,7.8106440892110314,6.353895275081217,8.0102902485228196],"y":[95.099999999999994,111.09999999999999,184.09999999999999,101.30000000000001],"text":["Idaho","Oregon","Vermont","Washington"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(183,159,0,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(183,159,0,1)"}},"hoveron":"points","name":"Hydroelectric","legendgroup":"Hydroelectric","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[8.1550967026034744,6.8254589645088881,8.0645572328953268,7.7891750214161775,8.3308019950167189,7.769365471447621,7.6509037779040394,6.681169934845232,8.4250762679625719,8.1455240333888081,7.9983588964340813,7.1659910976941621,7.3204555847895332,8.094121910546594,7.767862204010668,7.8883857039329195,7.6582826457612718,7.7794178671553178,8.1106418662712638,8.1302224332901485,8.1545660953239878,7.9734471967147451,8.3829147037509557,6.9902067701036481,8.7532019748892615,8.0115645867139929,7.8147558224448055],"y":[119,221.70000000000002,127.40000000000001,95.900000000000006,270.39999999999998,120.7,243.70000000000002,135.59999999999999,125.3,114,88,196.59999999999999,239.40000000000001,141.59999999999999,123.5,109.3,114.7,162.89999999999998,196.59999999999999,116.5,112.89999999999999,90.900000000000006,125.09999999999999,241.5,97.899999999999991,106.19999999999999,127.2],"text":["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Louisiana","Maine","Massachusetts","Michigan","Minnesota","Mississippi","Nevada","New Jersey","New York","North Carolina","Ohio","Oklahoma","Pennsylvania","Rhode Island","Texas","Virginia","Wisconsin"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,186,56,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,186,56,1)"}},"hoveron":"points","name":"Natural gas","legendgroup":"Natural gas","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[8.2672020927421723,7.5493076031568389,7.2289769560095829,8.0021030347880711,7.8817655160742648],"y":[122.10000000000001,150.39999999999998,206.09999999999999,109,109],"text":["Illinois","Maryland","New Hampshire","South Carolina","Tennessee"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,191,196,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,191,196,1)"}},"hoveron":"points","name":"Nuclear","legendgroup":"Nuclear","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[6.9619418875956418],"y":[380],"text":"Hawaii","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(97,156,255,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(97,156,255,1)"}},"hoveron":"points","name":"Petroleum","legendgroup":"Petroleum","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[7.8479682051308748,7.7611468717705785,7.5987609037172357,7.3195639412470479],"y":[93.400000000000006,112.10000000000001,91.799999999999997,108.69999999999999],"text":["Iowa","Kansas","New Mexico","South Dakota"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(245,100,227,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(245,100,227,1)"}},"hoveron":"points","name":"Wind","legendgroup":"Wind","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":43.105022831050235},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Electricity Generation vs. Retail Price by State","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[6.2339299400908148,8.8731673098796637],"tickmode":"array","ticktext":["3e+06","1e+07","3e+07","1e+08","3e+08"],"tickvals":[6.4771212547196626,7,7.4771212547196626,8,8.4771212547196626],"categoryorder":"array","categoryarray":["3e+06","1e+07","3e+07","1e+08","3e+08"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Total Generation (MWh)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[64.265000000000001,395.03500000000003],"tickmode":"array","ticktext":["100","200","300"],"tickvals":[100,200,300],"categoryorder":"array","categoryarray":["100","200","300"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Retail Price ($/MWh)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"primary_source","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"2e282c884ae9":{"x":{},"y":{},"text":{},"colour":{},"type":"scatter"}},"cur_data":"2e282c884ae9","visdat":{"2e282c884ae9":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<div class="plotly html-widget html-fill-item" id="htmlwidget-c0e813000d2a7721c10d" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-c0e813000d2a7721c10d">{"x":{"data":[{"x":[7.9868293975815376,7.8257560821603995,7.8252684058322055,7.4293142612908554,7.5708807876114479,7.6289734851547095,7.5457264350168201,7.7041060380008295,7.6096920344805179],"y":[113.80000000000001,100.7,110.60000000000001,108.3,90.700000000000003,79.299999999999997,99.700000000000003,110.5,91.400000000000006],"text":["Indiana","Kentucky","Missouri","Montana","Nebraska","North Dakota","Utah","West Virginia","Wyoming"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(248,118,109,1)"}},"hoveron":"points","name":"Coal","legendgroup":"Coal","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[7.3017988410988321,7.8106440892110314,6.353895275081217,8.0102902485228196],"y":[95.099999999999994,111.09999999999999,184.09999999999999,101.30000000000001],"text":["Idaho","Oregon","Vermont","Washington"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(183,159,0,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(183,159,0,1)"}},"hoveron":"points","name":"Hydroelectric","legendgroup":"Hydroelectric","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[8.1550967026034744,6.8254589645088881,8.0645572328953268,7.7891750214161775,8.3308019950167189,7.769365471447621,7.6509037779040394,6.681169934845232,8.4250762679625719,8.1455240333888081,7.9983588964340813,7.1659910976941621,7.3204555847895332,8.094121910546594,7.767862204010668,7.8883857039329195,7.6582826457612718,7.7794178671553178,8.1106418662712638,8.1302224332901485,8.1545660953239878,7.9734471967147451,8.3829147037509557,6.9902067701036481,8.7532019748892615,8.0115645867139929,7.8147558224448055],"y":[119,221.70000000000002,127.40000000000001,95.900000000000006,270.39999999999998,120.7,243.70000000000002,135.59999999999999,125.3,114,88,196.59999999999999,239.40000000000001,141.59999999999999,123.5,109.3,114.7,162.89999999999998,196.59999999999999,116.5,112.89999999999999,90.900000000000006,125.09999999999999,241.5,97.899999999999991,106.19999999999999,127.2],"text":["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Louisiana","Maine","Massachusetts","Michigan","Minnesota","Mississippi","Nevada","New Jersey","New York","North Carolina","Ohio","Oklahoma","Pennsylvania","Rhode Island","Texas","Virginia","Wisconsin"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,186,56,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,186,56,1)"}},"hoveron":"points","name":"Natural gas","legendgroup":"Natural gas","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[8.2672020927421723,7.5493076031568389,7.2289769560095829,8.0021030347880711,7.8817655160742648],"y":[122.10000000000001,150.39999999999998,206.09999999999999,109,109],"text":["Illinois","Maryland","New Hampshire","South Carolina","Tennessee"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,191,196,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,191,196,1)"}},"hoveron":"points","name":"Nuclear","legendgroup":"Nuclear","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[6.9619418875956418],"y":[380],"text":"Hawaii","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(97,156,255,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(97,156,255,1)"}},"hoveron":"points","name":"Petroleum","legendgroup":"Petroleum","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[7.8479682051308748,7.7611468717705785,7.5987609037172357,7.3195639412470479],"y":[93.400000000000006,112.10000000000001,91.799999999999997,108.69999999999999],"text":["Iowa","Kansas","New Mexico","South Dakota"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(245,100,227,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(245,100,227,1)"}},"hoveron":"points","name":"Wind","legendgroup":"Wind","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":43.105022831050235},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Electricity Generation vs. Retail Price by State","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[6.2339299400908148,8.8731673098796637],"tickmode":"array","ticktext":["3e+06","1e+07","3e+07","1e+08","3e+08"],"tickvals":[6.4771212547196626,7,7.4771212547196626,8,8.4771212547196626],"categoryorder":"array","categoryarray":["3e+06","1e+07","3e+07","1e+08","3e+08"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Total Generation (MWh)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[64.265000000000001,395.03500000000003],"tickmode":"array","ticktext":["100","200","300"],"tickvals":[100,200,300],"categoryorder":"array","categoryarray":["100","200","300"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Retail Price ($/MWh)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[],"showlegend":true,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"primary_source","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"31d819d01280":{"x":{},"y":{},"text":{},"colour":{},"type":"scatter"}},"cur_data":"31d819d01280","visdat":{"31d819d01280":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="cell">
@@ -8870,8 +8870,8 @@ Note
 <span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="datatables html-widget html-fill-item" id="htmlwidget-6b985444b95e321bc31a" style="width:100%;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-6b985444b95e321bc31a">{"x":{"filter":"none","vertical":false,"caption":"<caption style=\"caption-side: top; text-align: left; font-weight: bold; font-size: 1.1em;\">Table: Top 15 Transit Agency-Mode Pairs by Greenhouse Gas Emissions<\/caption>","data":[[],[],[],[],[],[]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Agency<\/th>\n      <th>Mode<\/th>\n      <th>State<\/th>\n      <th>Total UPT<\/th>\n      <th>Total Emissions (lbs)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"dom":"tip","columnDefs":[{"className":"dt-right","targets":[4,5]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"AGENCY","targets":1},{"name":"mode","targets":2},{"name":"state","targets":3},{"name":"total_upt","targets":4},{"name":"total_emissions_lbs","targets":5}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+<div class="datatables html-widget html-fill-item" id="htmlwidget-dc567df48a91afafd689" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-dc567df48a91afafd689">{"x":{"filter":"none","vertical":false,"caption":"<caption style=\"caption-side: top; text-align: left; font-weight: bold; font-size: 1.1em;\">Table: Top 15 Transit Agency-Mode Pairs by Greenhouse Gas Emissions<\/caption>","data":[[],[],[],[],[],[]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>Agency<\/th>\n      <th>Mode<\/th>\n      <th>State<\/th>\n      <th>Total UPT<\/th>\n      <th>Total Emissions (lbs)<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"dom":"tip","columnDefs":[{"className":"dt-right","targets":[4,5]},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"AGENCY","targets":1},{"name":"mode","targets":2},{"name":"state","targets":3},{"name":"total_upt","targets":4},{"name":"total_emissions_lbs","targets":5}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -8957,8 +8957,8 @@ Note
 <span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layout</span>(<span class="at">hoverlabel =</span> <span class="fu">list</span>(<span class="at">bgcolor =</span> <span class="st">&quot;white&quot;</span>, <span class="at">font =</span> <span class="fu">list</span>(<span class="at">size =</span> <span class="dv">12</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
-<div class="plotly html-widget html-fill-item" id="htmlwidget-c04ac2d79d5811b49e40" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-c04ac2d79d5811b49e40">{"x":{"data":[{"visible":false,"showlegend":false,"xaxis":null,"yaxis":null,"hoverinfo":"text","frame":null}],"layout":{"margin":{"t":41.90286425902864,"r":7.3059360730593621,"b":25.570776255707766,"l":25.570776255707766},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"<b> Transit Ridership vs. Greenhouse Gas Emissions by Mode <\/b>","font":{"color":"rgba(0,0,0,1)","family":"","size":18.596928185969279},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.050000000000000003,1.05],"tickmode":"array","ticktext":[],"tickvals":[],"categoryorder":"array","categoryarray":[],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Total Unlinked Passenger Trips (UPT) [Log Scale]","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.050000000000000003,1.05],"tickmode":"array","ticktext":[],"tickvals":[],"categoryorder":"array","categoryarray":[],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Total Emissions (lbs CO2e) [Log Scale]","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative","hoverlabel":{"bgcolor":"white","font":{"size":12}}},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"2e286b435b89":{"x":{},"y":{},"colour":{},"text":{},"type":"scatter"}},"cur_data":"2e286b435b89","visdat":{"2e286b435b89":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<div class="plotly html-widget html-fill-item" id="htmlwidget-89a5d0ce548f0410a546" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-89a5d0ce548f0410a546">{"x":{"data":[{"visible":false,"showlegend":false,"xaxis":null,"yaxis":null,"hoverinfo":"text","frame":null}],"layout":{"margin":{"t":41.90286425902864,"r":7.3059360730593621,"b":25.570776255707766,"l":25.570776255707766},"paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"<b> Transit Ridership vs. Greenhouse Gas Emissions by Mode <\/b>","font":{"color":"rgba(0,0,0,1)","family":"","size":18.596928185969279},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.050000000000000003,1.05],"tickmode":"array","ticktext":[],"tickvals":[],"categoryorder":"array","categoryarray":[],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Total Unlinked Passenger Trips (UPT) [Log Scale]","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-0.050000000000000003,1.05],"tickmode":"array","ticktext":[],"tickvals":[],"categoryorder":"array","categoryarray":[],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Total Emissions (lbs CO2e) [Log Scale]","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","barmode":"relative","hoverlabel":{"bgcolor":"white","font":{"size":12}}},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"31d8749d7292":{"x":{},"y":{},"colour":{},"text":{},"type":"scatter"}},"cur_data":"31d8749d7292","visdat":{"31d8749d7292":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 
