@@ -1,5 +1,5 @@
 ---
-title: "An Analysis On Nationwide Emissions. "
+title: "An Analysis On Nationwide Emissions."
 format:
   html:
     toc: true
@@ -11,6 +11,10 @@ execute:
   message: false
 ---
 
+What actually powers America’s transit fleets behind the scenes? Is your local transit system as green as it claims? What commodities run these systems?
+
+Public transportation is often celebrated as the backbone of sustainable urban mobility, yet its actual environmental footprint varies dramatically across geographic regions, operational modes, and local energy grids. This report evaluates nationwide public transit efficiency using an integrated dataset from the National Transit Database (NTD) and the U.S. Energy Information Administration (EIA). We'll be exploring energy & commodity footprints, state grid intensity integration, and efficiency leaders & outliers.
+
 ```{r}
 #| echo: true
 #| output: false
@@ -19,6 +23,7 @@ library(tidyverse)
 library(stringr)
 library(httr2)
 library(rvest)
+library(gt)
 
 get_eia_sep <- function(state, abbr){
     library(tidyverse)
@@ -212,6 +217,7 @@ To integrate state-level environmental data with transit energy consumption, the
 
 ```{r}
 #| echo: true
+# Design the relationship diagram
 library(DiagrammeR)
 grViz("
 digraph {
@@ -231,7 +237,7 @@ digraph {
 
 ```{r}
 #| echo: true
-# Next, we recode the technical transit mode abbreviations into readable descriptions:
+# We need to recode the technical transit mode abbreviations into readable descriptions:
 recode_values <- function(x, ...) {
     args <- list(...)
     val <- args[[x]]
@@ -287,7 +293,7 @@ Based on the table, West Virginia stands out with the highest carbon intensity i
 
 ```{r}
 #| echo: true
-# Next, we build an interactive plotly scatter plot to display state electricity pricing:
+# Build an interactive plotly scatter plot to display state electricity pricing:
 library(plotly)
 p <- EIA_SEP_REPORT |>
     ggplot(aes(x = generation_MWh, y = electricity_price_MWh, text = state, color = primary_source)) +
@@ -322,7 +328,7 @@ NTD_ENERGY |>
 ```
 
 ```{r}
-# Next, we merge the three core datasets and compute total greenhouse gas emissions per Agency and Mode:
+# Merge the three core datasets and compute total greenhouse gas emissions per Agency and Mode:
 complete_transit_data <- NTD_SERVICE |>
     inner_join(
       NTD_ENERGY |> mutate(`NTD ID` = as.character(`NTD ID`)),
@@ -341,7 +347,7 @@ complete_transit_data <- NTD_SERVICE |>
 ```
 
 ```{r}
-# Next, we normalize emissions by passenger usage metrics to evaluate operational efficiency:
+# Normalize emissions by passenger usage metrics to evaluate operational efficiency:
 agency_efficiency <- complete_transit_data |>
     group_by(AGENCY, state) |>
     summarize(
@@ -358,6 +364,7 @@ agency_efficiency <- complete_transit_data |>
 ```
 
 ```{r}
+#| echo: true
 # 1. Build the complete merged transit dataset (Agency + Mode grain)
 complete_transit_data <- NTD_SERVICE |>
     inner_join(
@@ -407,10 +414,7 @@ print("Emissions Summary by State and Primary Energy Source:")
 print(head(state_emissions_summary, 10))
 ```
 
-
-<details>
-<summary><strong>Show Code and Output: Transit Emissions Analysis</strong></summary>
-
+::: {.callout-note collapse="true"}
 ```{r}
 #| echo: true
 # Build the complete merged transit dataset (Agency + Mode grain)
@@ -446,7 +450,7 @@ agency_mode_emissions <- complete_transit_data |>
 print("Top Emitters by Agency and Mode:")
 print(head(agency_mode_emissions, 10))
 ```
-</details>
+:::
 
 ```{r}
 #| echo: true
@@ -477,8 +481,7 @@ complete_transit_data |>
   )
 ```
 
-<details>
-<summary><strong>Show Code and Output: Transit Emissions Analysis</strong></summary>
+::: {.callout-note collapse="true"}
 ```{R}
 # State-level aggregation for environmental impact reporting
 state_emissions_summary <- complete_transit_data |>
@@ -494,7 +497,8 @@ state_emissions_summary <- complete_transit_data |>
 print("Emissions Summary by State and Primary Energy Source:")
 print(head(state_emissions_summary, 10))
 ```
-<details>
+:::
+
 ```{r}
 #| echo: true
 library(plotly)
