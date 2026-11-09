@@ -1,5 +1,5 @@
 ---
-title: "An Analysis On Nationwide Emissions."
+title: "An Analysis On Nationwide Emissions"
 format:
   html:
     toc: true
@@ -97,11 +97,7 @@ get_eia_sep <- function(state, abbr){
 }
 
 EIA_SEP_REPORT <- map2(state.name, state.abb, get_eia_sep) |> list_rbind()
-```
 
-```{r}
-#| echo: true
-#| output: false
 load_ntd_energy <- function(){
   library(readxl)
   library(httr2)
@@ -157,11 +153,7 @@ load_ntd_energy <- function(){
 }
 
 NTD_ENERGY <- load_ntd_energy()
-```
 
-```{r}
-#| echo: true
-#| output: false
 load_ntd_service <- function(){
   library(httr2)
   library(tidyverse)
